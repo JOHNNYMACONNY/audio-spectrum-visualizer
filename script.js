@@ -9,37 +9,20 @@ let source = null;
 let rafID = null;
 let isPlaying = false;
 
-// Initialize audio context
+// Initialize audio context and analyser
 function initAudio() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 256;
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
-
-    // Create an oscillator source
-    source = audioCtx.createOscillator();
-    source.type = 'sine';
-    source.frequency.setValueAtTime(440, audioCtx.currentTime); // A4
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-
-    // Volume control
-    const gainNode = audioCtx.createGain();
-    source.disconnect();
-    source.connect(gainNode);
-    gainNode.connect(analyser);
-    gainNode.gain.value = volumeSlider.value;
-
-    volumeSlider.addEventListener('input', () => {
-        gainNode.gain.value = volumeSlider.value;
-    });
-
-    return { analyser, bufferLength, dataArray };
+    return { analyser, bufferLength, dataArray, audioCtx };
 }
 
 function draw() {
-    const { analyser, bufferLength, dataArray } = drawState || initDrawState();
+    const state = drawState;
+    if (!state) return;
+    const { analyser, bufferLength, dataArray } = state;
     analyser.getByteFrequencyData(dataArray);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -59,26 +42,62 @@ function draw() {
 }
 
 let drawState = null;
-function initDrawState() {
-    const state = initAudio();
-    drawState = state;
-    return state;
+let stream = null;
+
+// Request microphone and set up source
+async function setupMicrophone() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const sourceNode = audioCtx.createMediaStreamSource(stream);
+        sourceNode.connect(analyser);
+        // Volume control
+        const gainNode = audioCtx.createGain();
+        sourceNode.disconnect(); // disconnect from analyser to insert gain
+        sourceNode.connect(gainNode);
+        gainNode.connect(analyser);
+        gainNode.gain.value = volumeSlider.value;
+        volumeSlider.addEventListener('input', () => {
+            gainNode.gain.value = volumeSlider.value;
+        });
+        drawState = { analyser, bufferLength: analyser.frequencyBinCount, dataArray: new Uint8Array(analyser.frequencyBinCount), audioCtx };
+    } catch (err) {
+        console.error('Error accessing microphone:', err);
+        alert('Could not access microphone. Please grant permission and try again.');
+    }
 }
 
-playBtn.addEventListener('click', () => {
+playBtn.addEventListener('click', async () => {
     if (!isPlaying) {
-        source.start(0);
-        draw();
-        playBtn.textContent = 'Pause';
-        isPlaying = true;
+        if (!audioCtx) {
+            const init = initAudio();
+            drawState = { analyser: init.analyser, bufferLength: init.bufferLength, dataArray: new Uint8Array(init.bufferLength), audioCtx: init.audioCtx };
+            analyser = init.analyser;
+            audioCtx = init.audioCtx;
+        }
+        await setupMicrophone();
+        if (drawState) {
+            draw();
+            playBtn.textContent = 'Pause';
+            isPlaying = true;
+        }
     } else {
-        source.stop();
-        cancelAnimationFrame(rafID);
+        // Stop
+        if (rafID) cancelAnimationFrame(rafID);
+        if (source) source.disconnect();
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         playBtn.textContent = 'Play';
         isPlaying = false;
+        // Optionally close audio context to free resources
+        if (audioCtx && audioCtx.state !== 'closed') {
+            audioCtx.close().then(() => {
+                audioCtx = null;
+                drawState = null;
+                analyser = null;
+            });
+        }
     }
 });
-
-// Initialize but not start until play
-initDrawState();

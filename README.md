@@ -1,45 +1,77 @@
-# Audio Spectrum Visualizer
+# Sonic Organism — Audio Visualizer
 
-A real-time audio frequency visualizer built with the Web Audio API and HTML5 Canvas. This project demonstrates:
+A generative audio visualizer that grows a living bioluminescent specimen from sound.
 
-- Audio context creation and manipulation
-- Real-time frequency data analysis with AnalyserNode
-- Dynamic canvas drawing based on audio spectra
-- Interactive controls (play/pause, volume)
-- Microphone input (device audio) via getUserMedia
-- Modern vanilla JavaScript (no frameworks)
+Instead of drawing normal EQ bars, **Sonic Organism** treats audio like biological fuel:
+
+- **Bass** grows the root body and thickens branches.
+- **Kicks** fire membrane pulses from the nucleus.
+- **Mids** bend and warp the organism's branches.
+- **Highs** release glowing spores and microscopic sparks.
+- **Silence** lets fog and decay creep back in.
+- **Time** matters: a full track leaves a final visual fossil you can export as PNG.
+
+## Live Demo
+
+GitHub Pages:
+
+https://johnnymaconny.github.io/audio-spectrum-visualizer/
 
 ## Features
 
-- Captures audio from the default microphone (or system audio if configured) using `navigator.mediaDevices.getUserMedia`.
-- Visualizes frequency bins as a colorful bar graph.
-- Volume slider controls input gain.
-- Play/Pause button to start and stop audio capture and visualization.
-- Responsive design centered on the page.
+- Live microphone input via `navigator.mediaDevices.getUserMedia`.
+- Audio file input for feeding the visualizer full songs.
+- Vanilla Web Audio API frequency + waveform analysis.
+- Canvas-based organic growth simulation: branches, spores, pulses, fog, and membrane waves.
+- Persistent trails so each track creates a unique accumulated visual artifact.
+- Adjustable input gain, growth memory, and mutation.
+- Save the current specimen/fossil as a PNG.
+- No framework and no build step.
 
-## How to Run
+## How to Run Locally
 
-1. Clone or download this repository.
-2. Open `index.html` in a modern web browser (Chrome, Firefox, Safari, Edge) **served via HTTP** (file:// may block microphone in some browsers; consider using a local server like `python -m http.server` or VS Code Live Server).
-3. Click the **Play** button.
-4. Grant microphone permission when prompted.
-5. Adjust the volume slider as desired.
-6. Speak or play audio near the microphone to see the visualization react.
+Because browsers often block microphone access on `file://`, serve the folder over HTTP:
 
-## Implementation Details
+```bash
+python3 -m http.server 8080
+```
 
-- Uses `AudioContext` to create an analyser node.
-- Connects microphone stream → MediaStreamAudioSourceNode → GainNode (volume) → AnalyserNode → destination.
-- The AnalyserNode provides frequency domain data via `getByteFrequencyData`.
-- The canvas is animated with `requestAnimationFrame`, drawing each frequency bin as a vertical bar.
-- No external audio files are required; uses live input.
+Then open:
 
-## Customization
+```text
+http://localhost:8080
+```
 
-- Change `analyser.fftSize` for higher/lower resolution (powers of two).
-- Adjust color mapping in the `fillStyle` calculation.
-- Replace microphone source with an audio file source using `fetch` and `decodeAudioData` for pre‑recorded visualization.
+To test:
+
+1. Click **Start Mic Growth** and grant microphone permission.
+2. Or click **Feed Audio File** and choose a local track.
+3. Let the audio play and watch the organism grow.
+4. Click **Save PNG** when you want to export the final specimen.
+
+## Controls
+
+- **Start Mic Growth:** captures live microphone audio.
+- **Feed Audio File:** loads and plays a local audio file.
+- **New Specimen:** resets the organism with a fresh seed.
+- **Save PNG:** downloads the current canvas.
+- **Input gain:** controls audio input strength before analysis.
+- **Growth memory:** controls how long trails and fossil marks remain.
+- **Mutation:** controls branching turbulence and organic instability.
+
+## Implementation Notes
+
+The visualizer uses:
+
+- `AudioContext`
+- `AnalyserNode`
+- `MediaStreamAudioSourceNode`
+- `MediaElementAudioSourceNode`
+- `CanvasRenderingContext2D`
+- Seeded pseudo-random growth for reproducible specimen behavior per reset
+
+No audio is uploaded anywhere. File playback and microphone analysis happen locally in the browser.
 
 ## License
 
-MIT – feel free to use and modify for your portfolio or learning.
+MIT — use it, remix it, mutate it.

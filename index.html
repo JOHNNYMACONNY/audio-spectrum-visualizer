@@ -1,21 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Audio Spectrum Visualizer</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sonic Organism is a generative audio visualizer that grows a living bioluminescent specimen from sound.">
+  <title>Sonic Organism — Audio Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Audio Spectrum Visualizer</h1>
-        <div class="controls">
-            <button id="playBtn">Play</button>
-            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
-            <label for="volumeSlider">Volume</label>
+  <main class="shell">
+    <section class="hero" aria-label="Visualizer controls">
+      <div class="title-block">
+        <p class="eyebrow">YBF LAB SPECIMEN 013</p>
+        <h1>Sonic Organism</h1>
+        <p class="subtitle">An audio visualizer that doesn’t animate sound. It lets sound grow a living bioluminescent specimen.</p>
+      </div>
+
+      <div class="panel">
+        <div class="control-row primary-actions">
+          <button id="micBtn" class="button hot">Start Mic Growth</button>
+          <label class="file-control" for="audioFile">
+            <span>Feed Audio File</span>
+            <input id="audioFile" type="file" accept="audio/*">
+          </label>
+          <button id="resetBtn" class="button ghost">New Specimen</button>
+          <button id="saveBtn" class="button ghost">Save PNG</button>
         </div>
-        <canvas id="analyserCanvas" width="800" height="400"></canvas>
-        <p class="info">Visualizes audio frequency data using Web Audio API and Canvas.</p>
-    </div>
-    <script src="script.js"></script>
+
+        <div class="control-grid">
+          <label>
+            Input gain
+            <input type="range" id="gainSlider" min="0" max="2" step="0.01" value="1">
+          </label>
+          <label>
+            Growth memory
+            <input type="range" id="memorySlider" min="0.84" max="0.985" step="0.001" value="0.94">
+          </label>
+          <label>
+            Mutation
+            <input type="range" id="mutationSlider" min="0" max="1" step="0.01" value="0.62">
+          </label>
+        </div>
+
+        <audio id="audioPlayer" controls></audio>
+        <p id="status" class="status">Idle. Start the mic or feed it a track.</p>
+      </div>
+    </section>
+
+    <section class="specimen-stage" aria-label="Sonic Organism canvas">
+      <canvas id="organismCanvas"></canvas>
+      <div class="hud top-left">
+        <span>LOW ROOT</span><strong id="bassReadout">00</strong>
+      </div>
+      <div class="hud top-right">
+        <span>SPORE COUNT</span><strong id="sporeReadout">000</strong>
+      </div>
+      <div class="hud bottom-left">
+        <span>MODE</span><strong id="modeReadout">DORMANT</strong>
+      </div>
+      <div class="scanline"></div>
+    </section>
+
+    <section class="concept-card">
+      <p><strong>How it reads sound:</strong> bass grows the root body, kicks pulse the membrane, mids bend the branches, highs throw spores, and silence lets fog creep back in. Let a whole song play and the final frame becomes the track’s fossil.</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>
